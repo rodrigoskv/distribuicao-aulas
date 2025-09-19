@@ -1,5 +1,7 @@
+// src/db/data-source.ts
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import path from 'path';
 import { config } from '../config';
 import { Subject } from '../models/Subject';
 import { Teacher } from '../models/Teacher';
@@ -15,7 +17,7 @@ const type = (config.db.type || 'sqlite') as any;
 
 export const AppDataSource = new DataSource({
   type,
-  database: type === 'sqlite' ? config.db.sqliteFile : undefined,
+  //database: type === 'sqlite' ? (config.db.sqliteFile || path.join(process.cwd(), 'data.sqlite')) : undefined,
   host: type !== 'sqlite' ? config.db.host : undefined,
   port: type !== 'sqlite' ? config.db.port : undefined,
   username: type !== 'sqlite' ? config.db.username : undefined,
@@ -23,9 +25,11 @@ export const AppDataSource = new DataSource({
   database: type !== 'sqlite' ? config.db.database : undefined,
   charset: type === 'mysql' ? 'utf8mb4' : undefined,
   extra: type === 'mysql' ? { decimalNumbers: true, timezone: 'Z' } : undefined,
-  synchronize: true,
+
+  synchronize: false,
   logging: false,
+
   entities: [Subject, Teacher, SchoolClass, Resource, Availability, Demand, Timeslot, Lesson, Schedule],
-  migrations: [],
+  migrations: [path.join(__dirname, '../migrations/*.{ts,js}')],
   subscribers: []
 });
